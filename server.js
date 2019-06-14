@@ -1,8 +1,14 @@
 var express = require('express');
 var bcrypt = require('bcrypt');
 var fs = require('fs');
+var bodyParser = require('body-parser');
 const saltRounds = 10;
 var app = express();
+
+app.use(bodyParser.urlencoded({
+	extended: true
+}));
+app.use(bodyParser.json());
 
 var server = app.listen(3000, function(){
 	console.log("Node.js is listening to PORT:" + server.address().port);
@@ -31,10 +37,9 @@ app.get("/", function(req, res, next) {
 	res.render("index", {});
 });
 
-app.get("/login", function(req, res, next) {
-	console.log(req.query.userid + " " + req.query.passwd);
-	var input_userid = req.query.userid;
-	var input_passwd = req.query.passwd;
+app.post("/login", function(req, res, next) {
+	var input_userid = req.body.userid;
+	var input_passwd = req.body.passwd;
 	var input_passwd_hash;
 	var db_passwd_hash = get_passwd_hash(input_userid);
 
