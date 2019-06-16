@@ -42,7 +42,7 @@ app.post("/login", (req, res, next) => {
 		var input_passwd_hash;
 		var db_passwd_hash;
 	
-		var query = "select passwd from member where id='" + input_userid + "'";
+		var query = "SELECT passwd FROM member WHERE id='" + input_userid + "'";
 		var result = await client.query(query);
 
 		if(typeof result.rows[0] !== 'undefined') {
@@ -69,11 +69,10 @@ app.post("/add",(req, res, next) => {
 		var input_userid = req.body.userid;
 		var input_passwd1 = req.body.passwd1;
 		var input_passwd2 = req.body.passwd2;
+		var input_passwd_hash = bcrypt.hashSync(input_passwd1, saltRounds);
 
-		var id_query = "select id from member where id='" + input_userid + "'";
+		var id_query = "SELECT id FROM member WHERE id='" + input_userid + "'";
 		var id_result = await client.query(id_query);
-
-		console.log(id_result);
 
 		if(typeof id_result.rows[0] !== 'undefined') {
 			res.send("id duplicate");
@@ -82,6 +81,8 @@ app.post("/add",(req, res, next) => {
 			res.send("wrong password");
 		}
 
+		var add_query = "INSERT INTO member VALUES ('" + input_userid + "', '" + input_passwd_hash + "', 00001 )";
+		console.log(add_query);
 		res.send("user added");
 	})().catch(next);
 
