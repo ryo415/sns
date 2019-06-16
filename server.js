@@ -50,9 +50,6 @@ app.post("/login", (req, res, next) => {
 		} else {
 			db_passwd_hash = -1;
 		}
-		
-		console.log(db_passwd_hash);
-		console.log(input_passwd);
 
 		if(db_passwd_hash != -1) {
 			if(bcrypt.compareSync(input_passwd, db_passwd_hash)) {
@@ -68,6 +65,24 @@ app.post("/login", (req, res, next) => {
 });
 
 app.post("/add",(req, res, next) => {
+	(async () => {
+		var input_userid = req.body.userid;
+		var input_passwd1 = req.body.passwd1;
+		var input_passwd2 = req.body.passwd2;
 
+		var id_query = "select id from member where id='" + input_userid + "'";
+		var id_result = await client.query(id_query);
+
+		console.log(id_result);
+
+		if(typeof id_result.rows[0] !== 'undefined') {
+			res.send("id duplicate");
+		}
+		if(input_passwd1 != input_passwd2) {
+			res.send("wrong password");
+		}
+
+		res.send("user added");
+	})().catch(next);
 
 });
