@@ -1,14 +1,15 @@
 var express = require('express');
 var bcrypt = require('bcrypt');
-var fs = require('fs');
 var bodyParser = require('body-parser');
 var { Client } = require('pg');
+var session = require('express-session');
 const saltRounds = 10;
 var app = express();
 
 app.use(bodyParser.urlencoded({
-	extended: true
+	    extended: true
 }));
+
 app.use(bodyParser.json());
 
 const client = new Client({
@@ -28,6 +29,10 @@ app.set('view engine', 'ejs');
 
 app.get("/", function(req, res, next) {
 	res.render("index", {});
+});
+
+app.get("/useradd", function(req, res, next) {
+	res.render("useradd",{});
 });
 
 app.post("/login", (req, res, next) => {
@@ -60,4 +65,9 @@ app.post("/login", (req, res, next) => {
 			res.send("no user");
 		}
 	})().catch(next);
+});
+
+app.post("/add",(req, res, next) => {
+
+
 });
