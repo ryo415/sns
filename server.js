@@ -18,26 +18,11 @@ const client = new Client({
 	password: 'postgres',
 	port: 5432
 })
+client.connect();
 
 var server = app.listen(3000, function(){
 	console.log("Node.js is listening to PORT:" + server.address().port);
 });
-
-function get_passwd_hash(id) {
-	var msg = fs.readFileSync("member.txt", {encoding: "utf-8"});
-	var line = msg.toString().split('\n');
-	var userid;
-
-	for(i=0;i<line.length;i++) {
-		line_split = line[i].split(',');
-		userid = line_split[0];
-		passwd = line_split[1];
-		if(userid == id) {
-			return passwd;
-		}
-	}
-	return -1
-}
 
 app.set('view engine', 'ejs');
 
@@ -50,13 +35,10 @@ app.post("/login", (req, res, next) => {
 		var input_userid = req.body.userid;
 		var input_passwd = req.body.passwd;
 		var input_passwd_hash;
-		//var db_passwd_hash = get_passwd_hash(input_userid);
 		var db_passwd_hash;
 	
 		var query = "select passwd from member where id='" + input_userid + "'";
-		await client.connect();
 		var result = await client.query(query);
-		await client.end();
 
 		if(typeof result.rows[0] !== 'undefined') {
 			db_passwd_hash = result.rows[0].passwd;
