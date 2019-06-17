@@ -41,7 +41,7 @@ app.get("/", function(req, res, next) {
 });
 
 app.get("/useradd", function(req, res, next) {
-	res.render("useradd",{});
+	res.render("add_user",{});
 });
 
 app.post("/logout", (req, res, next) => {
@@ -70,11 +70,11 @@ app.post("/login", (req, res, next) => {
 				req.session.userid = input_userid;
 				res.render("mypage", {userid: req.session.userid})
 			} else {
-				res.send("bad login");
+				res.render("login_error",{});
 	
 			}
 		} else {
-			res.send("no user");
+			res.render("login_error",{});
 		}
 	})().catch(next);
 });
