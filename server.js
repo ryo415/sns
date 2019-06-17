@@ -75,15 +75,14 @@ app.post("/add",(req, res, next) => {
 		var id_result = await client.query(id_query);
 
 		if(typeof id_result.rows[0] !== 'undefined') {
-			res.send("id duplicate");
+			res.render("add_user_error", {error: 'IDが重複しています'});
+		} else if(input_passwd1 != input_passwd2) {
+			res.render("add_user_error", {error: 'パスワードが異なっています'});
+		} else {
+			var add_query = "INSERT INTO member VALUES ('" + input_userid + "', '" + input_passwd_hash + "', 00001 )";
+			client.query(add_query);
+			res.render("add_user_complete",{});
 		}
-		if(input_passwd1 != input_passwd2) {
-			res.send("wrong password");
-		}
-
-		var add_query = "INSERT INTO member VALUES ('" + input_userid + "', '" + input_passwd_hash + "', 00001 )";
-		console.log(add_query);
-		res.send("user added");
 	})().catch(next);
 
 });
