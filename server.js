@@ -9,8 +9,13 @@ var app = express();
 app.use(bodyParser.urlencoded({
 	    extended: true
 }));
-
 app.use(bodyParser.json());
+app.use(session({
+	secret: 'sns',
+	resave: false,
+	saveUninitialized: true,
+	cookie: {maxAge: 180000}
+}));
 
 const client = new Client({
 	user: 'postgres',
@@ -28,11 +33,20 @@ var server = app.listen(3000, function(){
 app.set('view engine', 'ejs');
 
 app.get("/", function(req, res, next) {
-	res.render("index", {});
+	if (req.session.userid != undefined) {
+		res.render("mypage", {userid: req.session.userid});
+	} else {
+		res.render("index", {});
+	}
 });
 
 app.get("/useradd", function(req, res, next) {
 	res.render("useradd",{});
+});
+
+app.post("/logout", (req, res, next) => {
+	delete req.session.userid;
+	res.render("logout",{});
 });
 
 app.post("/login", (req, res, next) => {
@@ -53,7 +67,8 @@ app.post("/login", (req, res, next) => {
 
 		if(db_passwd_hash != -1) {
 			if(bcrypt.compareSync(input_passwd, db_passwd_hash)) {
-				res.send("good login");
+				req.session.userid = input_userid;
+				res.render("mypage", {userid: req.session.userid})
 			} else {
 				res.send("bad login");
 	
