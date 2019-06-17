@@ -1,0 +1,38 @@
+<html>
+<body>
+    <h1>プロフィールの編集</h1>
+    <form action="/do_edit_profile" method="POST">
+    <table border=1>
+        <tr>
+	    <th>UserName</th><td><%= userid %></td>
+        </tr>
+	<tr>
+	    <th>introduction</th><td><input type="text" name="intro" id="intro"></td>
+	</tr>
+	<tr>
+	    <th>birthday</th><td>
+            <select name="month" id="month">
+		<option value="">未選択</option>
+		<script>
+		    for(var i=1;i<=12;i++){
+			document.write("<option value="+i+">"+i+"</option>");
+		    }
+		</script>
+	    </select>
+		/
+	    <select name="day" id="day">
+		<option value="">未選択</option>
+	        <script>
+		    for(var i=1;i<=31;i++) {
+			document.write("<option value="+i+">"+i+"</option>");
+		    }
+	    	</script>
+	    </select>
+	</td></tr>
+    </table>
+    <input type="submit" value="apply">
+    </form>
+    <a href="/profile">戻る</a>
+</body>
+</html>
+	

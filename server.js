@@ -45,6 +45,14 @@ app.get("/useradd", function(req, res, next) {
 	res.render("add_user",{});
 });
 
+app.get("/edit_profile", function(req, res, next) {
+	if(req.session.userid != undefined) {
+		res.render("edit_profile", {userid: req.session.userid});
+	} else {
+		res.render("index",{});
+	}
+});
+
 app.get("/profile", function(req, res, next) {
 	(async () => {
 		var profile_query;
@@ -53,8 +61,6 @@ app.get("/profile", function(req, res, next) {
 		var intro;
 		var month;
 		var day;
-
-		console.log(req.session.userid);
 
 		if(req.session.userid == undefined) {
 			res.render("index",{});
@@ -82,6 +88,52 @@ app.get("/profile", function(req, res, next) {
 	})().catch(next);
 });
 
+app.post("/do_edit_profile", (req, res, next) => {
+	(async () => {
+		if(req.session.userid == undefined) {
+			res.render("index", {});
+		} else {
+			var query;
+			var image_name;
+			var intro;
+			var month;
+			var day;
+			var result;
+			if(req.body.intro != '') {
+				query = "UPDATE profile SET intro='" + req.body.intro + "' WHERE id='" + req.session.userid + "'";
+				await client.query(query);
+			}
+			if(req.body.month != '') {
+				query = "UPDATE profile SET BD_month=" + req.body.month + " WHERE id='" + req.session.userid + "'";
+				await client.query(query);
+			}
+			if(req.body.day != '') {
+				query = "UPDATE profile SET BD_day=" + req.body.day + " WHERE id='" + req.session.userid + "'";
+				await client.query(query);
+			}
+
+			query = "SELECT * FROM profile WHERE id='" + req.session.userid + "'";
+			result = await client.query(query);
+			if(result.rows[0].icon_image != undefined) {
+				image_name = result.rows[0].icon_image;
+			}
+			if(result.rows[0].intro != undefined) {
+				intro = result.rows[0].intro;
+			}
+			if(result.rows[0].bd_month != undefined) {
+				month = result.rows[0].bd_month;
+			} else {
+				month = "XX";
+			}
+			if(result.rows[0].bd_day != undefined) {
+				day = result.rows[0].bd_day;
+			} else {
+				day = "XX";
+			}
+			res.render("profile", {userid: req.session.userid, intro: intro, month: month, day: day});
+		}
+	})().catch(next);
+});
 
 app.post("/logout", (req, res, next) => {
 	delete req.session.userid;
