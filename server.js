@@ -59,22 +59,25 @@ app.post("/login", (req, res, next) => {
 		var query = "SELECT passwd FROM member WHERE id='" + input_userid + "'";
 		var result = await client.query(query);
 
-		if(typeof result.rows[0] !== 'undefined') {
-			db_passwd_hash = result.rows[0].passwd;
+		if(!input_userid) {
+			res.render("login_error", {error: 'IDを入力してください。'});
 		} else {
-			db_passwd_hash = -1;
-		}
-
-		if(db_passwd_hash != -1) {
-			if(bcrypt.compareSync(input_passwd, db_passwd_hash)) {
-				req.session.userid = input_userid;
-				res.render("mypage", {userid: req.session.userid})
+			if(typeof result.rows[0] !== 'undefined') {
+				db_passwd_hash = result.rows[0].passwd;
 			} else {
-				res.render("login_error",{});
-	
+				db_passwd_hash = -1;
 			}
-		} else {
-			res.render("login_error",{});
+	
+			if(db_passwd_hash != -1) {
+				if(bcrypt.compareSync(input_passwd, db_passwd_hash)) {
+					req.session.userid = input_userid;
+					res.render("mypage", {userid: req.session.userid})
+				} else {
+					res.render("login_error",{error: 'IDもしくはパスワードが違います。'});	
+				}
+			} else {
+				res.render("login_error",{error: 'IDもしくはパスワードが違います。'});
+			}
 		}
 	})().catch(next);
 });
