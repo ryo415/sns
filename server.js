@@ -45,6 +45,44 @@ app.get("/useradd", function(req, res, next) {
 	res.render("add_user",{});
 });
 
+app.get("/profile", function(req, res, next) {
+	(async () => {
+		var profile_query;
+		var result;
+		var image_name;
+		var intro;
+		var month;
+		var day;
+
+		console.log(req.session.userid);
+
+		if(req.session.userid == undefined) {
+			res.render("index",{});
+		} else {
+			profile_query = "SELECT * FROM profile WHERE id='" + req.session.userid + "'";
+			result = await client.query(profile_query);
+			if(result.rows[0].icon_image != undefined) {
+				image_name = result.rows[0].icon_image;
+			}
+			if(result.rows[0].intro != undefined) {
+				intro = result.rows[0].intro;
+			}
+			if(result.rows[0].bd_month != undefined) {
+				month = result.rows[0].bd_month;
+			} else {
+				month = "XX";
+			}
+			if(result.rows[0].bd_day != undefined) {
+				day = result.rows[0].bd_day;
+			} else {
+				day = "XX";
+			}
+			res.render("profile", {userid: req.session.userid, intro: intro, month: month, day: day});
+		}
+	})().catch(next);
+});
+
+
 app.post("/logout", (req, res, next) => {
 	delete req.session.userid;
 	res.render("logout",{});
@@ -99,7 +137,9 @@ app.post("/add",(req, res, next) => {
 			res.render("add_user_error", {error: 'パスワードが異なっています'});
 		} else {
 			var add_query = "INSERT INTO member VALUES ('" + input_userid + "', '" + input_passwd_hash + "', 00001 )";
+			var add_profile_query = "INSERT INTO profile VALUES ('" + input_userid + "',null,null,null,null)";
 			client.query(add_query);
+			client.query(add_profile_query);
 			res.render("add_user_complete",{});
 		}
 	})().catch(next);
