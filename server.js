@@ -1,14 +1,15 @@
 var express = require('express');
 var bcrypt = require('bcrypt');
-var fs = require('fs');
 var bodyParser = require('body-parser');
 var { Client } = require('pg');
+var session = require('express-session');
 const saltRounds = 10;
 var app = express();
 
 app.use(bodyParser.urlencoded({
-	extended: true
+	    extended: true
 }));
+
 app.use(bodyParser.json());
 
 const client = new Client({
@@ -30,6 +31,10 @@ app.get("/", function(req, res, next) {
 	res.render("index", {});
 });
 
+app.get("/useradd", function(req, res, next) {
+	res.render("useradd",{});
+});
+
 app.post("/login", (req, res, next) => {
 	(async () => {
 		var input_userid = req.body.userid;
@@ -37,7 +42,7 @@ app.post("/login", (req, res, next) => {
 		var input_passwd_hash;
 		var db_passwd_hash;
 	
-		var query = "select passwd from member where id='" + input_userid + "'";
+		var query = "SELECT passwd FROM member WHERE id='" + input_userid + "'";
 		var result = await client.query(query);
 
 		if(typeof result.rows[0] !== 'undefined') {
@@ -45,9 +50,6 @@ app.post("/login", (req, res, next) => {
 		} else {
 			db_passwd_hash = -1;
 		}
-		
-		console.log(db_passwd_hash);
-		console.log(input_passwd);
 
 		if(db_passwd_hash != -1) {
 			if(bcrypt.compareSync(input_passwd, db_passwd_hash)) {
@@ -60,4 +62,27 @@ app.post("/login", (req, res, next) => {
 			res.send("no user");
 		}
 	})().catch(next);
+});
+
+app.post("/add",(req, res, next) => {
+	(async () => {
+		var input_userid = req.body.userid;
+		var input_passwd1 = req.body.passwd1;
+		var input_passwd2 = req.body.passwd2;
+		var input_passwd_hash = bcrypt.hashSync(input_passwd1, saltRounds);
+
+		var id_query = "SELECT id FROM member WHERE id='" + input_userid + "'";
+		var id_result = await client.query(id_query);
+
+		if(typeof id_result.rows[0] !== 'undefined') {
+			res.render("add_user_error", {error: 'IDが重複しています'});
+		} else if(input_passwd1 != input_passwd2) {
+			res.render("add_user_error", {error: 'パスワードが異なっています'});
+		} else {
+			var add_query = "INSERT INTO member VALUES ('" + input_userid + "', '" + input_passwd_hash + "', 00001 )";
+			client.query(add_query);
+			res.render("add_user_complete",{});
+		}
+	})().catch(next);
+
 });
