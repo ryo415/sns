@@ -6,6 +6,7 @@ var session = require('express-session');
 const saltRounds = 10;
 var app = express();
 
+app.use(express.static('views'));
 app.use(bodyParser.urlencoded({
 	    extended: true
 }));
