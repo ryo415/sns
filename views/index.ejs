@@ -1,0 +1,26 @@
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="css/login.css">
+</head>
+<body>
+<div class="form-wrapper">
+  <h1>Sign In</h1>
+  <form action="/login" method="POST">
+    <div class="form-item">
+      <label for="userid"></label>
+      <input type="text" name="userid" required="required" placeholder="UserName"></input>
+    </div>
+    <div class="form-item">
+      <label for="password"></label>
+      <input type="password" name="passwd" id="passwd" required="required" placeholder="Password"></input>
+    </div>
+    <div class="button-panel">
+      <input type="submit" class="button" title="Sign In" value="Sign In"></input>
+    </div>
+  </form>
+  <div class="form-footer">
+    <p><a href="/useradd">Create an account</a></p>
+  </div>
+</div>
+</body>
+</html>

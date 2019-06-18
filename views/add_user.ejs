@@ -1,0 +1,29 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="css/add_user.css">
+</head>
+<body>
+<div class="form-wrapper">
+  <h1>Create Account</h1>
+  <form action="/add" method="POST">
+    <div class="form-item">
+      <label for="userid"></label>
+      <input type="text" name="userid" id="userid" required="required" placeholder="UserName"></input>
+    </div>
+    <div class="form-item">
+      <label for="password"></label>
+      <input type="password" name="passwd1" id="passwd1" required="required" placeholder="Password"></input>
+    </div>   <div class="form-item">
+      <label for="password"></label>
+      <input type="password" name="passwd2" id="passwd2" required="required" placeholder="Password Again"></input>
+    </div>
+    <div class="button-panel">
+      <input type="submit" class="button" title="Sign In" value="Create Account"></input>
+    </div>
+  </form>
+  <div class="form-footer">
+    <p><a href="/">back to TOP page</a></p>
+  </div>
+</div>
+</body>
+</html>

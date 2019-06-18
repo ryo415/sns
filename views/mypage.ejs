@@ -1,0 +1,22 @@
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="css/default.css">
+</head>
+<body>
+<div class="form-wrapper">
+    <h1>マイページ</h1>
+    <div class="form-item" align="center">
+	<p>ようこそ、<%= userid %> さん</p>
+	<a href="/profile">プロフィールページ</a>
+    </div>
+    <form action="/logout" method="POST">
+    <div class="button-panel" align="center">
+	<input type="submit" value="ログアウト">
+    </div>
+    </form>
+    <div class="form-footer">
+	<a href="/restore">退会</a>
+    </div>
+</div>
+</body>
+</html>
