@@ -3,6 +3,7 @@ var bcrypt = require('bcrypt');
 var bodyParser = require('body-parser');
 var { Client } = require('pg');
 var session = require('express-session');
+var url = require('url');
 const saltRounds = 10;
 var app = express();
 
@@ -53,6 +54,14 @@ app.get("/edit_profile", function(req, res, next) {
 	}
 });
 
+app.get("/restore", function(req, res, next) {
+	if(req.session.userid != undefined) {
+		res.render("restore",{});
+	} else {
+		res.render("index",{});
+	}
+});
+
 app.get("/profile", function(req, res, next) {
 	(async () => {
 		var profile_query;
@@ -84,6 +93,28 @@ app.get("/profile", function(req, res, next) {
 				day = "XX";
 			}
 			res.render("profile", {userid: req.session.userid, intro: intro, month: month, day: day});
+		}
+	})().catch(next);
+});
+
+app.get("/do_restore", function(req, res, next) {
+	(async () => {
+		var query;
+		var referer = req.headers.referer;
+		if(referer != undefined) {
+			var url_parse = url.parse(referer)
+			if(url_parse.path == '/restore') {
+				query = "DELETE FROM member WHERE id='" + req.session.userid + "'";
+				await client.query(query);
+				query = "DELETE FROM profile WHERE id='" + req.session.userid + "'";
+				await client.query(query);
+				delete req.session.userid;
+				res.render("index",{});
+			} else {
+				res.render("restore_error",{error: 'リンク元が正しくありません。'})
+			}
+		} else {
+			res.render("restore_error", {error: '直接リンクは禁止されています。'});
 		}
 	})().catch(next);
 });
