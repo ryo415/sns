@@ -1,7 +1,12 @@
 <html>
+<head>
+    <link rel="stylesheet" type="text/css" href="css/login.css">
+</head>
 <body>
+<div class="form-wrapper">
     <h1>プロフィールの編集</h1>
     <form action="/do_edit_profile" method="POST">
+    <div align="center">
     <table border=1>
         <tr>
 	    <th>UserName</th><td><%= userid %></td>
@@ -30,9 +35,15 @@
 	    </select>
 	</td></tr>
     </table>
-    <input type="submit" value="apply">
+    <div class="button-panel">
+    <input type="submit" class="button" value="apply">
+    </div>
     </form>
+    <div class="form-footer">
     <a href="/profile">戻る</a>
+    </div>
+    </div>
+</div>
 </body>
 </html>
 	

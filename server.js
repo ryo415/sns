@@ -16,7 +16,7 @@ app.use(session({
 	secret: 'sns',
 	resave: false,
 	saveUninitialized: true,
-	cookie: {maxAge: 180000}
+	cookie: {maxAge: null}
 }));
 
 const client = new Client({

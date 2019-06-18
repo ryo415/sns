@@ -1,6 +1,11 @@
 <html>
+<head>
+    <link rel="stylesheet" type="text/css" href="css/default.css">
+</head>
 <body>
+<div class="form-wrapper">
     <h1>プロフィール</h1>
+    <div align="center">
     <table border=1>
         <tr>
 	    <th>UserName</th><td><%= userid %></td>
@@ -12,7 +17,11 @@
 	    <th>birthday</th><td><%= month %>/<%= day %></td>
 	</tr>
     </table>
+    <div class="form-footer">
     <a href="/edit_profile">プロフィールの編集</a>
     <a href="/">トップへ戻る</a>
+    </div>
+    </div>
+</div>
 </body>
 </html>
