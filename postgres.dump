@@ -39,7 +39,7 @@ SET default_with_oids = false;
 --
 
 CREATE TABLE public.member (
-    id character varying(256),
+    id character varying(256) NOT NULL,
     passwd character varying(256),
     serial integer
 );
@@ -48,12 +48,54 @@ CREATE TABLE public.member (
 ALTER TABLE public.member OWNER TO postgres;
 
 --
+-- Name: profile; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.profile (
+    id text NOT NULL,
+    icon_image text,
+    intro text,
+    bd_month integer,
+    bd_day integer
+);
+
+
+ALTER TABLE public.profile OWNER TO postgres;
+
+--
 -- Data for Name: member; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.member (id, passwd, serial) FROM stdin;
-r-kikuchi	$2b$10$TmXa2xeISa90dgNYCP7sw.bXQGvuhANz0WBDWmh41LlA6.mzA6O2K	1
+test	$2b$10$bH5naX/rMQ7e76h22/Mgju6Jfz6wCOWnUhAtHdfdnIfXfpKztwlv.	1
+admin	$2b$10$UhSHJ9sFL7ONafpvyfmYee1TJD.VPUhg9SACso7PBj/lhloqfOIG.	1
 \.
+
+
+--
+-- Data for Name: profile; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.profile (id, icon_image, intro, bd_month, bd_day) FROM stdin;
+test	\N	\N	\N	\N
+admin	\N	\N	\N	\N
+\.
+
+
+--
+-- Name: member member_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.member
+    ADD CONSTRAINT member_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: profile profile_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.profile
+    ADD CONSTRAINT profile_pkey PRIMARY KEY (id);
 
 
 --

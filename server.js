@@ -109,7 +109,7 @@ app.get("/do_restore", function(req, res, next) {
 				query = "DELETE FROM profile WHERE id='" + req.session.userid + "'";
 				await client.query(query);
 				delete req.session.userid;
-				res.render("index",{});
+				res.render("restore_complete",{});
 			} else {
 				res.render("restore_error",{error: 'リンク元が正しくありません。'})
 			}
