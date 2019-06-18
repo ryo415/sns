@@ -16,6 +16,8 @@ SNSに実装されている基本的な機能を作成
 # cd /opt
 # git clone https://github.com/ryo415/sns.git
 # cd sns
-# psql sns < postgres.dump
+$ su - postgres
+$ psql sns < postgres.dump
+$ exit 
 # node server.js
 ```
