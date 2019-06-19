@@ -56,6 +56,28 @@ async function get_profile(userid) {
 	return profile
 }
 
+function search_result_html(result) {
+	var html;
+	if(result.rows.length != 0){
+		var id;
+		var intro;
+		html = "<table border=1><tr><th>ID</th><th>introduction</th>";
+		for(var i=0;i<result.rows.length;i++) {
+			id = result.rows[i].id;
+			if(result.rows[i].intro == null){
+				intro = '';
+			} else {
+				intro = result.rows[i].intro;
+			}
+			html = html + "<tr><td>" + id + "</td><td>" + intro + "</td></tr>";	
+		}
+		html = html + "</table>"
+	} else {
+		html = "<p>検索結果なし</p>";
+	}
+
+	return html;
+}
 client.connect();
 
 var server = app.listen(3000, function(){
@@ -116,24 +138,36 @@ app.get("/profile", function(req, res, next) {
 
 app.get("/do_restore", function(req, res, next) {
 	(async () => {
-		var query;
-		var referer = req.headers.referer;
-		if(referer != undefined) {
-			var url_parse = url.parse(referer)
-			if(url_parse.path == '/restore') {
-				query = "DELETE FROM member WHERE id='" + req.session.userid + "'";
-				await client.query(query);
-				query = "DELETE FROM profile WHERE id='" + req.session.userid + "'";
-				await client.query(query);
-				delete req.session.userid;
-				res.render("restore_complete",{});
-			} else {
-				res.render("restore_error",{error: 'リンク元が正しくありません。'})
-			}
+		if(req.session.userid == undefined) {
+			render("index", {});
 		} else {
-			res.render("restore_error", {error: '直接リンクは禁止されています。'});
+			var query;
+			var referer = req.headers.referer;
+			if(referer != undefined) {
+				var url_parse = url.parse(referer)
+				if(url_parse.path == '/restore') {
+					query = "DELETE FROM member WHERE id='" + req.session.userid + "'";
+					await client.query(query);
+					query = "DELETE FROM profile WHERE id='" + req.session.userid + "'";
+					await client.query(query);
+					delete req.session.userid;
+					res.render("restore_complete",{});
+				} else {
+					res.render("restore_error",{error: 'リンク元が正しくありません。'})
+				}
+			} else {
+				res.render("restore_error", {error: '直接リンクは禁止されています。'});
+			}
 		}
 	})().catch(next);
+});
+
+app.get("/search", function(req, res, next) {
+	if(req.session.userid != undefined) {
+		res.render("search", {});
+	} else {
+		res.render("index", {});
+	}
 });
 
 app.post("/do_edit_profile", (req, res, next) => {
@@ -162,6 +196,20 @@ app.post("/do_edit_profile", (req, res, next) => {
 
 			var profile = await get_profile(req.session.userid);
 			res.render("profile", {userid: profile.userid, intro: profile.intro, month: profile.month, day: profile.day});
+		}
+	})().catch(next);
+});
+
+app.post("/do_search", (req, res, next) => {
+	(async () => {
+		if(req.session.userid == undefined) {
+			res.render("index", {});
+		} else {
+			var search_str = req.body.search;
+			var query = "SELECT * FROM profile WHERE id LIKE '%" + search_str + "%'";
+			var result = await client.query(query);
+			html = search_result_html(result)
+			res.render("search_result",{result: html});
 		}
 	})().catch(next);
 });

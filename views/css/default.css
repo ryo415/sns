@@ -38,6 +38,10 @@ table {
   text-align: center;
 }
 
+td {
+  padding: 5px;
+}
+
 .form-item {
   margin-bottom: 0.75em;
   width: 100%;
