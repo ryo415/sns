@@ -56,7 +56,7 @@ async function get_profile(userid) {
 	return profile
 }
 
-function search_result_html(result, myself_id) {
+function search_result_html(result) {
 	var html;
 	if(result.rows.length != 0){
 		var id;
@@ -72,9 +72,6 @@ function search_result_html(result, myself_id) {
 			html = html + "<tr><td>" + id + "</td><td>" + intro + "</td></tr>";
 		}
 		html = html + "</table>"
-		if(i==1) {
-			html = "<p>検索結果なし</p>";
-		}
 	} else {
 		html = "<p>検索結果なし</p>";
 	}
@@ -211,7 +208,7 @@ app.post("/do_search", (req, res, next) => {
 			var search_str = req.body.search;
 			var query = "SELECT * FROM profile WHERE id LIKE '%" + search_str + "%' AND id NOT LIKE '" + req.session.userid + "'";
 			var result = await client.query(query);
-			html = search_result_html(result,req.session.userid)
+			html = search_result_html(result)
 			res.render("search_result",{result: html});
 		}
 	})().catch(next);
