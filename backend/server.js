@@ -26,6 +26,36 @@ const client = new Client({
 	password: 'postgres',
 	port: 5432
 })
+
+async function get_profile(userid) {
+	var profile;
+	var result;
+	var query = "SELECT * FROM profile WHERE id='" + userid + "'";
+	result = await client.query(query);
+	profile = {userid: userid};
+	if(result.rows[0].intro != null) {
+		profile.intro = result.rows[0].intro;
+	} else {
+		profile.intro = '';
+	}
+	if(result.rows[0].image_name != null) {
+		profile.image = result.rows[0].image_name;
+	} else {
+		profile.image = '';
+	}
+	if(result.rows[0].bd_month != null) {
+		profile.month = result.rows[0].bd_month;
+	} else {
+		profile.month = 'XX';
+	}
+	if(result.rows[0].bd_day != null) {
+		profile.day = result.rows[0].bd_day;
+	} else {
+		profile.day = 'XX';
+	}
+	return profile
+}
+
 client.connect();
 
 var server = app.listen(3000, function(){
@@ -48,11 +78,14 @@ app.get("/useradd", function(req, res, next) {
 });
 
 app.get("/edit_profile", function(req, res, next) {
-	if(req.session.userid != undefined) {
-		res.render("edit_profile", {userid: req.session.userid});
-	} else {
-		res.render("index",{});
-	}
+	( async () => {
+		if(req.session.userid != undefined) {
+			var profile = await get_profile(req.session.userid);
+			res.render("edit_profile", {userid: profile.userid, intro: profile.intro, month: profile.month, day: profile.day});
+		} else {
+			res.render("index",{});
+		}
+	})().catch(next);
 });
 
 app.get("/restore", function(req, res, next) {
@@ -75,25 +108,8 @@ app.get("/profile", function(req, res, next) {
 		if(req.session.userid == undefined) {
 			res.render("index",{});
 		} else {
-			profile_query = "SELECT * FROM profile WHERE id='" + req.session.userid + "'";
-			result = await client.query(profile_query);
-			if(result.rows[0].icon_image != undefined) {
-				image_name = result.rows[0].icon_image;
-			}
-			if(result.rows[0].intro != undefined) {
-				intro = result.rows[0].intro;
-			}
-			if(result.rows[0].bd_month != undefined) {
-				month = result.rows[0].bd_month;
-			} else {
-				month = "XX";
-			}
-			if(result.rows[0].bd_day != undefined) {
-				day = result.rows[0].bd_day;
-			} else {
-				day = "XX";
-			}
-			res.render("profile", {userid: req.session.userid, intro: intro, month: month, day: day});
+			var profile = await get_profile(req.session.userid);
+			res.render("profile", {userid: profile.userid, intro: profile.intro, month: profile.month, day: profile.day});
 		}
 	})().catch(next);
 });
@@ -144,25 +160,8 @@ app.post("/do_edit_profile", (req, res, next) => {
 				await client.query(query);
 			}
 
-			query = "SELECT * FROM profile WHERE id='" + req.session.userid + "'";
-			result = await client.query(query);
-			if(result.rows[0].icon_image != undefined) {
-				image_name = result.rows[0].icon_image;
-			}
-			if(result.rows[0].intro != undefined) {
-				intro = result.rows[0].intro;
-			}
-			if(result.rows[0].bd_month != undefined) {
-				month = result.rows[0].bd_month;
-			} else {
-				month = "XX";
-			}
-			if(result.rows[0].bd_day != undefined) {
-				day = result.rows[0].bd_day;
-			} else {
-				day = "XX";
-			}
-			res.render("profile", {userid: req.session.userid, intro: intro, month: month, day: day});
+			var profile = await get_profile(req.session.userid);
+			res.render("profile", {userid: profile.userid, intro: profile.intro, month: profile.month, day: profile.day});
 		}
 	})().catch(next);
 });
