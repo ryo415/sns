@@ -12,10 +12,10 @@
 	    <th>UserName</th><td><%= userid %></td>
         </tr>
 	<tr>
-	    <th>introduction</th><td><input type="text" name="intro" id="intro"></td>
+	    <th>introduction</th><td><%= intro %></td><td><input type="text" name="intro" id="intro"></td>
 	</tr>
 	<tr>
-	    <th>birthday</th><td>
+	    <th>birthday</th><td><%= month %>/<%= day %></td><td>
             <select name="month" id="month">
 		<option value="">未選択</option>
 		<script>
