@@ -6,6 +6,7 @@ var session = require('express-session');
 var url = require('url');
 const saltRounds = 10;
 var app = express();
+var users = require('./api/users');
 
 app.use(express.static('../views'));
 app.use(bodyParser.urlencoded({
@@ -18,6 +19,7 @@ app.use(session({
 	saveUninitialized: true,
 	cookie: {maxAge: null}
 }));
+app.use('/users', users);
 
 const client = new Client({
 	user: 'postgres',
