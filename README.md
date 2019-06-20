@@ -1,5 +1,5 @@
 # sns
-SNSに実装されている基本的な機能を作成  
+Node.jsを学びつつ、SNSに実装されている基本的な機能を作成  
   
 ## 用いたミドルウェア  
  - Node.js  
@@ -22,3 +22,9 @@ $ psql sns < postgres.dump
 $ exit 
 # node server.js
 ```
+  
+## API機能  
+アクセスすると以下が返ってくるAPIを実装した  
+ - /users: 登録ユーザのid一覧  
+ - /users/profile: 登録ユーザのプロフィール情報一覧  
+ - /users/member: 登録ユーザのidとhash化されたpassword一覧  
