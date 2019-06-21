@@ -7,6 +7,7 @@ var url = require('url');
 const saltRounds = 10;
 var app = express();
 var users = require('./api/users');
+var view = require('./api/view_profile');
 
 app.use(express.static('../views'));
 app.use(bodyParser.urlencoded({
@@ -20,6 +21,7 @@ app.use(session({
 	cookie: {maxAge: null}
 }));
 app.use('/users', users);
+app.use('/view', view);
 
 const client = new Client({
 	user: 'postgres',
@@ -77,7 +79,7 @@ function search_result_html(result) {
 			} else {
 				intro = result.rows[i].intro;
 			}
-			html = html + "<tr><td>" + id + "</td><td>" + intro + "</td></tr>";
+			html = html + "<tr><td><a href='/view/" + id + "'>"+ id + "</a></td><td>" + intro + "</td></tr>";
 		}
 		html = html + "</table>"
 	} else {
