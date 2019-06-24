@@ -8,7 +8,7 @@ const saltRounds = 10;
 var app = express();
 var users = require('./api/users');
 
-app.use(express.static('../views'));
+app.use(express.static('./views'));
 app.use(bodyParser.urlencoded({
 	    extended: true
 }));
@@ -92,7 +92,7 @@ var server = app.listen(3000, function(){
 	console.log("Node.js is listening to PORT:" + server.address().port);
 });
 
-app.set('views', '../views');
+app.set('views', './views');
 app.set('view engine', 'ejs');
 
 app.get("/", function(req, res, next) {
