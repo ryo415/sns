@@ -48,13 +48,14 @@ async function get_profile(userid) {
 router.get('/*', function (req, res, next) {
 	(async () => {
 		var userid = req.params[0];
-		//var profile = await get_profile(userid);
-		var profile = {userid: 'test', intro: 'test', month: 7, day: 21, hide: 'OFF'};
+		var profile = await get_profile(userid);
+
 		if(profile.hide == 'ON') {
 			res.render("hide_profile", {});
 		} else {
-			res.render("view_profile",{userid: userid, intro: profile.intro, month: profile.month, day: profile.day})
+			res.render("view_profile", {userid: profile.userid, intro: profile.intro, month: profile.month, day: profile.day});
 		}
+		//res.send(profile)
 	})().catch(next);
 });
 
