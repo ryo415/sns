@@ -294,7 +294,7 @@ app.post("/add",(req, res, next) => {
 			res.render("add_user_error", {error: 'パスワードが異なっています'});
 		} else {
 			var add_query = "INSERT INTO member VALUES ('" + input_userid + "', '" + input_passwd_hash + "', 00001 )";
-			var add_profile_query = "INSERT INTO profile VALUES ('" + input_userid + "',null,null,null,null)";
+			var add_profile_query = "INSERT INTO profile VALUES ('" + input_userid + "',null,null,null,null,false)";
 			client.query(add_query);
 			client.query(add_profile_query);
 			res.render("add_user_complete",{});

@@ -25,7 +25,12 @@ $ exit
 ```
   
 ## API機能  
-アクセスすると以下が返ってくるAPIを実装した  
+GETリクエストでアクセスすると以下のJSONが返ってくるAPIを実装した  
  - /users: 登録ユーザのid一覧  
  - /users/profile: 登録ユーザのプロフィール情報一覧  
  - /users/member: 登録ユーザのidとhash化されたpassword一覧  
+ - /users/profile/{ユーザ名}: ユーザのプロファイル情報
+ - /users/member/{ユーザ名}: ユーザのid, hash化されたpassword情報
+そのほか
+ - /users/add/{ユーザ名}: passwordがIDのユーザを作成する
+ - /user/delete/{ユーザ名}: 指定のユーザを削除する
