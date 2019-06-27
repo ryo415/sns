@@ -35,4 +35,22 @@ router.get('/member', function (req, res, next) {
 	})().catch(next);
 });
 
+router.get('/member/*', function(req, res, next) {
+	(async () => {
+		var userid = req.params[0];
+		var query = "SELECT * FROM member WHERE id='" + userid + "'";
+		var result = await client.query(query);
+		res.send(result.rows[0]);
+	})().catch(next)
+});
+
+router.get('/profile/*', function(req, res, next) {
+	(async () => {
+		var userid = req.params[0];
+		var query = "SELECT * FROM profile WHERE id='" + userid + "'";
+		var result = await client.query(query);
+		res.send(result.rows[0]);
+	})().catch(next)
+});
+
 module.exports = router
