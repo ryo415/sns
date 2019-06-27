@@ -18,6 +18,7 @@ Node.jsを学びつつ、SNSに実装されている基本的な機能を作成
 # cd sns/backend
 $ su - postgres
 $ cd /opt/sns/backend
+$ createdb sns
 $ psql sns < postgres.dump
 $ exit 
 # node server.js
