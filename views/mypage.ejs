@@ -1,14 +1,14 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="css/default.css">
+    <link rel="stylesheet" type="text/css" href="css/menu.css">
 </head>
 <body>
+<% include menu %>
 <div class="form-wrapper">
     <h1>マイページ</h1>
     <div class="form-item" align="center">
 	<p>ようこそ、<%= userid %> さん</p>
-	<a href="/profile">プロフィールページ</a><br>
-	<a href="/search">検索ページ</a><br>
     </div>
     <form action="/logout" method="POST">
     <div class="button-panel" align="center">

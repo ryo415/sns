@@ -1,21 +1,23 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="css/default.css">
+    <link rel="stylesheet" type="text/css" href="css/menu.css">
 </head>
 <body>
-    <div class="form-wrapper">
-	<h1>アカウント検索</h1>
-        <form action="/do_search" method="POST">
-	    <div class="form-item">
-	        <input type="text" name="search" id="search" placeholder="search id"></input>
-	    </div>
-	    <div class="button-panel">
-	        <input type="submit" class="button" title="Search" value="Search"></input>
-	    </div>
-	</form>
-	<div class="form-footer">
-	    <p><a href="/">Back to TOP page</a></p>
-	</div>
+<% include menu %>
+<div class="form-wrapper">
+    <h1>アカウント検索</h1>
+    <form action="/do_search" method="POST">
+        <div class="form-item">
+            <input type="text" name="search" id="search" placeholder="search id"></input>
+        </div>
+        <div align="center" class="button-panel">
+            <input type="submit" class="button" title="Search" value="Search"></input>
+        </div>
+    </form>
+    <div class="form-footer">
+	<p><a href="/">トップへ戻る</a></p>
     </div>
+</div>
 </body>
 </html>	

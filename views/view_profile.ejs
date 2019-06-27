@@ -6,7 +6,7 @@
 <body>
 <% include menu %>
 <div class="form-wrapper">
-    <h1>プロフィール</h1>
+    <h1><%= userid %>のプロフィール</h1>
     <div align="center">
     <table border=1>
         <tr>
@@ -18,12 +18,8 @@
 	<tr>
 	    <th>birthday</th><td><%= month %>/<%= day %></td>
 	</tr>
-	<tr>
-	    <th>hide</th><td><%= hide %></td>
-	</tr>
     </table>
     <div class="form-footer">
-    <a href="/edit_profile">プロフィールの編集</a>
     <a href="/">トップへ戻る</a>
     </div>
     </div>

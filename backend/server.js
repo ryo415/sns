@@ -35,26 +35,32 @@ async function get_profile(userid) {
 	var query = "SELECT * FROM profile WHERE id='" + userid + "'";
 	result = await client.query(query);
 	profile = {userid: userid};
-	if(result.rows[0].intro != null) {
-		profile.intro = result.rows[0].intro;
-	} else {
+	if(result.rows[0].intro == null) {
 		profile.intro = '';
-	}
-	if(result.rows[0].image_name != null) {
-		profile.image = result.rows[0].image_name;
 	} else {
+		profile.intro = result.rows[0].intro;
+	}
+	if(result.rows[0].image_name == null) {
 		profile.image = '';
-	}
-	if(result.rows[0].bd_month != null) {
-		profile.month = result.rows[0].bd_month;
 	} else {
+		profile.image = result.rows[0].image_name;
+	}
+	if(result.rows[0].bd_month == null) {
 		profile.month = 'XX';
-	}
-	if(result.rows[0].bd_day != null) {
-		profile.day = result.rows[0].bd_day;
 	} else {
-		profile.day = 'XX';
+		profile.month = result.rows[0].bd_month;
 	}
+	if(result.rows[0].bd_day == null) {
+		profile.day = 'XX';
+	} else {
+		profile.day = result.rows[0].bd_day;
+	}
+	if(result.rows[0].hide == true) {
+		profile.hide = 'ON';
+	} else {
+		profile.hide = 'OFF';
+	}
+
 	return profile
 }
 
@@ -71,7 +77,7 @@ function search_result_html(result) {
 			} else {
 				intro = result.rows[i].intro;
 			}
-			html = html + "<tr><td>" + id + "</td><td>" + intro + "</td></tr>";
+			html = html + "<tr><td><a href='/view_profile?userid=" + id + "'>"+ id + "</a></td><td>" + intro + "</td></tr>";
 		}
 		html = html + "</table>"
 	} else {
@@ -105,7 +111,7 @@ app.get("/edit_profile", function(req, res, next) {
 	( async () => {
 		if(req.session.userid != undefined) {
 			var profile = await get_profile(req.session.userid);
-			res.render("edit_profile", {userid: profile.userid, intro: profile.intro, month: profile.month, day: profile.day});
+			res.render("edit_profile", {userid: profile.userid, intro: profile.intro, month: profile.month, day: profile.day, hide: profile.hide});
 		} else {
 			res.render("index",{});
 		}
@@ -133,7 +139,7 @@ app.get("/profile", function(req, res, next) {
 			res.render("index",{});
 		} else {
 			var profile = await get_profile(req.session.userid);
-			res.render("profile", {userid: profile.userid, intro: profile.intro, month: profile.month, day: profile.day});
+			res.render("profile", {userid: profile.userid, intro: profile.intro, month: profile.month, day: profile.day, hide: profile.hide});
 		}
 	})().catch(next);
 });
@@ -172,6 +178,18 @@ app.get("/search", function(req, res, next) {
 	}
 });
 
+app.get('/view_profile', function (req, res, next) {
+	(async () => {
+		var userid = req.query.userid
+		var profile = await get_profile(userid);
+		if(profile.hide == 'ON') {
+			res.render("hide_profile", {});
+		} else {
+			res.render("view_profile", {userid: profile.userid, intro: profile.intro, month: profile.month, day: profile.day});
+		}
+	})().catch(next);
+});
+
 app.post("/do_edit_profile", (req, res, next) => {
 	(async () => {
 		if(req.session.userid == undefined) {
@@ -195,9 +213,15 @@ app.post("/do_edit_profile", (req, res, next) => {
 				query = "UPDATE profile SET BD_day=" + req.body.day + " WHERE id='" + req.session.userid + "'";
 				await client.query(query);
 			}
-
+			if(req.body.hide == 'ON') {
+				query = "UPDATE profile SET hide=true WHERE id='" + req.session.userid + "'";
+				await client.query(query);
+			} else if(req.body.hide == 'OFF') {
+				query = "UPDATE profile SET hide=false WHERE id='" + req.session.userid + "'";
+				await client.query(query);
+			}
 			var profile = await get_profile(req.session.userid);
-			res.render("profile", {userid: profile.userid, intro: profile.intro, month: profile.month, day: profile.day});
+			res.render("profile", {userid: profile.userid, intro: profile.intro, month: profile.month, day: profile.day, hide: profile.hide});
 		}
 	})().catch(next);
 });
@@ -208,7 +232,7 @@ app.post("/do_search", (req, res, next) => {
 			res.render("index", {});
 		} else {
 			var search_str = req.body.search;
-			var query = "SELECT * FROM profile WHERE id LIKE '%" + search_str + "%' AND id NOT LIKE '" + req.session.userid + "'";
+			var query = "SELECT * FROM profile WHERE id LIKE '%" + search_str + "%' AND id NOT LIKE '" + req.session.userid + "' AND hide IS NOT true";
 			var result = await client.query(query);
 			html = search_result_html(result)
 			res.render("search_result",{result: html});
