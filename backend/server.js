@@ -7,7 +7,6 @@ var url = require('url');
 const saltRounds = 10;
 var app = express();
 var users = require('./api/users');
-var view = require('./api/view_profile');
 
 app.use(express.static('../views'));
 app.use(bodyParser.urlencoded({
@@ -21,7 +20,6 @@ app.use(session({
 	cookie: {maxAge: null}
 }));
 app.use('/users', users);
-app.use('/view', view);
 
 const client = new Client({
 	user: 'postgres',
@@ -79,7 +77,7 @@ function search_result_html(result) {
 			} else {
 				intro = result.rows[i].intro;
 			}
-			html = html + "<tr><td><a href='/view/" + id + "'>"+ id + "</a></td><td>" + intro + "</td></tr>";
+			html = html + "<tr><td><a href='/view_profile?userid=" + id + "'>"+ id + "</a></td><td>" + intro + "</td></tr>";
 		}
 		html = html + "</table>"
 	} else {
@@ -178,6 +176,18 @@ app.get("/search", function(req, res, next) {
 	} else {
 		res.render("index", {});
 	}
+});
+
+app.get('/view_profile', function (req, res, next) {
+	(async () => {
+		var userid = req.query.userid
+		var profile = await get_profile(userid);
+		if(profile.hide == 'ON') {
+			res.render("hide_profile", {});
+		} else {
+			res.render("view_profile", {userid: profile.userid, intro: profile.intro, month: profile.month, day: profile.day});
+		}
+	})().catch(next);
 });
 
 app.post("/do_edit_profile", (req, res, next) => {
