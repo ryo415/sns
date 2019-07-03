@@ -182,6 +182,8 @@ app.get('/view_profile', function (req, res, next) {
 	(async () => {
 		var userid = req.query.userid
 		var profile = await get_profile(userid);
+		var follow;
+
 		if(profile.hide == 'ON') {
 			res.render("hide_profile", {});
 		} else {
@@ -189,6 +191,28 @@ app.get('/view_profile', function (req, res, next) {
 		}
 	})().catch(next);
 });
+
+app.get('/follow', function(req, res, next) {
+	(async () => {
+		var userid = req.session.userid;
+		var followid = req.query.followid
+
+		var query = "SELECT * FROM follow WHERE id='" + userid + "'";
+		var result = await client.query(query);
+		var follow = result.rows[0].follow + "," + followid;
+		var follow_query = "UPDATE follow SET follow='" + follow + "' WHERE id='" + userid + "'";
+		await client.query(follow_query);
+
+		query = "SELECT * FROM follow WHERE id='" + followid + "'";
+		result = await client.query(query);
+		var follower = result.rows[0].follower + "," + userid;
+		var follower_query = "UPDATE follow SET follower='" + follower + "' WHERE id='" + followid + "'";
+		await client.query(follower_query);
+
+		res.render("/complete_follow", {followid: followid});
+	})().catch(next)
+});
+
 
 app.post("/do_edit_profile", (req, res, next) => {
 	(async () => {
