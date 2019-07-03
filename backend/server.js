@@ -86,6 +86,21 @@ function search_result_html(result) {
 
 	return html;
 }
+
+async function is_follow(userid, followid) {
+	var query = "SELECT * FROM follow WHERE id='" + userid + "'";
+	var result = await client.query(query);
+	var follow = result.rows[0].follow;
+	var follow_flag = false;
+
+	follow.split(',').forEach( function( id ) {
+		if( id == followid) {
+			follow_flag = true;
+		}
+	})
+	return follow_flag
+}
+
 client.connect();
 
 var server = app.listen(3000, function(){
@@ -158,6 +173,8 @@ app.get("/do_restore", function(req, res, next) {
 					await client.query(query);
 					query = "DELETE FROM profile WHERE id='" + req.session.userid + "'";
 					await client.query(query);
+					query = "DELETE FROM follow WHERE id='" + req.session.userid + "'";
+					await client.query(query);
 					delete req.session.userid;
 					res.render("restore_complete",{});
 				} else {
@@ -182,12 +199,19 @@ app.get('/view_profile', function (req, res, next) {
 	(async () => {
 		var userid = req.query.userid
 		var profile = await get_profile(userid);
-		var follow;
+		var follow = await is_follow(req.session.userid, req.query.userid);
+		var follow_button;
+
+		if(follow) {
+			follow_button = "フォロー中";
+		} else {
+			follow_button = "<a href='/follow?followid=" + req.query.userid + "'>フォローする</a>";
+		}
 
 		if(profile.hide == 'ON') {
 			res.render("hide_profile", {});
 		} else {
-			res.render("view_profile", {userid: profile.userid, intro: profile.intro, month: profile.month, day: profile.day});
+			res.render("view_profile", {userid: profile.userid, intro: profile.intro, month: profile.month, day: profile.day, follow_button: follow_button});
 		}
 	})().catch(next);
 });
@@ -209,7 +233,7 @@ app.get('/follow', function(req, res, next) {
 		var follower_query = "UPDATE follow SET follower='" + follower + "' WHERE id='" + followid + "'";
 		await client.query(follower_query);
 
-		res.render("/complete_follow", {followid: followid});
+		res.render("complete_follow", {followid: followid});
 	})().catch(next)
 });
 
@@ -319,8 +343,10 @@ app.post("/add",(req, res, next) => {
 		} else {
 			var add_query = "INSERT INTO member VALUES ('" + input_userid + "', '" + input_passwd_hash + "', 00001 )";
 			var add_profile_query = "INSERT INTO profile VALUES ('" + input_userid + "',null,null,null,null,false)";
+			var add_follow_query = "INSERT INTO follow VALUES ('" + input_userid + "',null,null)";
 			client.query(add_query);
 			client.query(add_profile_query);
+			client.query(add_follow_query);
 			res.render("add_user_complete",{});
 		}
 	})().catch(next);
