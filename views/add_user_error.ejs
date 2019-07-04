@@ -1,6 +1,17 @@
 <html>
+<head>
+    <link rel="stylesheet" type="text/css" href="css/default.css">
+    <link rel="stylesheet" type="text/css" href="css/menu.css">
+</head>
 <body>
-   <h2><%= error %></h2>
-   <a href="/useradd">会員登録ページへ戻る</a>
+<div class="form-wrapper">
+    <h1>会員登録エラー</h1>
+    <div align="center">
+        <p><%= error %></p>
+    </div>
+    <div class="form-footer">
+        <a href="/useradd">会員登録ページへ戻る</a>
+    </div>
+</div>
 </body>
 </html>
