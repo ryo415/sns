@@ -88,16 +88,13 @@ function search_result_html(result) {
 }
 
 async function is_follow(userid, followid) {
-	var query = "SELECT * FROM follow WHERE id='" + userid + "'";
+	var query = "SELECT * FROM follow WHERE userid='" + userid + "' and followid='" + followid + "'";
 	var result = await client.query(query);
-	var follow = result.rows[0].follow;
 	var follow_flag = false;
+	if(typeof result.rows[0] !== 'undefined'){
+		follow_flag = true;
+	}
 
-	follow.split(',').forEach( function( id ) {
-		if( id == followid) {
-			follow_flag = true;
-		}
-	})
 	return follow_flag
 }
 
@@ -197,21 +194,25 @@ app.get("/search", function(req, res, next) {
 
 app.get('/view_profile', function (req, res, next) {
 	(async () => {
-		var userid = req.query.userid
-		var profile = await get_profile(userid);
-		var follow = await is_follow(req.session.userid, req.query.userid);
-		var follow_button;
+		if(req.session.userid != undefined) {
+			var userid = req.query.userid
+			var profile = await get_profile(userid);
+			var follow = await is_follow(req.session.userid, req.query.userid);
+			var follow_button;
 
-		if(follow) {
-			follow_button = "フォロー中";
+			if(follow) {
+				follow_button = "フォロー中<br><a href='/unfollow?followid=" + userid + "'>フォロー解除する</a>";
+			} else {
+				follow_button = "<a href='/follow?followid=" + userid + "'>フォローする</a>";
+			}
+	
+			if(profile.hide == 'ON') {
+				res.render("hide_profile", {});
+			} else {
+				res.render("view_profile", {userid: profile.userid, intro: profile.intro, month: profile.month, day: profile.day, follow_button: follow_button});
+			}
 		} else {
-			follow_button = "<a href='/follow?followid=" + req.query.userid + "'>フォローする</a>";
-		}
-
-		if(profile.hide == 'ON') {
-			res.render("hide_profile", {});
-		} else {
-			res.render("view_profile", {userid: profile.userid, intro: profile.intro, month: profile.month, day: profile.day, follow_button: follow_button});
+			res.render("index", {});
 		}
 	})().catch(next);
 });
@@ -221,22 +222,24 @@ app.get('/follow', function(req, res, next) {
 		var userid = req.session.userid;
 		var followid = req.query.followid
 
-		var query = "SELECT * FROM follow WHERE id='" + userid + "'";
-		var result = await client.query(query);
-		var follow = result.rows[0].follow + "," + followid;
-		var follow_query = "UPDATE follow SET follow='" + follow + "' WHERE id='" + userid + "'";
+		var follow_query = "INSERT INTO follow VALUES ('" + userid + "', '" + followid + "')";
 		await client.query(follow_query);
 
-		query = "SELECT * FROM follow WHERE id='" + followid + "'";
-		result = await client.query(query);
-		var follower = result.rows[0].follower + "," + userid;
-		var follower_query = "UPDATE follow SET follower='" + follower + "' WHERE id='" + followid + "'";
-		await client.query(follower_query);
-
-		res.render("complete_follow", {followid: followid});
+		res.render("complete_follow", {title: "フォロー完了"});
 	})().catch(next)
 });
 
+app.get('/unfollow', function(req, res, next) {
+	(async () => {
+		var userid = req.session.userid;
+		var unfollowid = req.query.followid;
+
+		var unfollow_query = "DELETE FROM follow WHERE userid='" + userid + "' AND followid='" + unfollowid + "'";
+		await client.query(unfollow_query);
+
+		res.render("complete_follow", {title: "フォロー解除完了"})
+	})().catch(next)
+});
 
 app.post("/do_edit_profile", (req, res, next) => {
 	(async () => {
