@@ -87,6 +87,32 @@ function search_result_html(result) {
 	return html;
 }
 
+function follow_result_html(result, page) {
+	var html;
+	if(result.rows.length != 0){
+		var id;
+		var intro;
+		html = "<table border=1><tr><th>ID</th>";
+		for(var i=0;i<result.rows.length;i++) {
+			if(page == "follow") {
+				id = result.rows[i].followid;
+			} else if(page == "follower") {
+				id = result.rows[i].userid;
+			}
+			html = html + "<tr><td><a href='/view_profile?userid=" + id + "'>"+ id + "</a></td></tr>";
+		}
+		html = html + "</table>"
+	} else {
+		if(page == "follow") {
+			html = "<p>フォローなし</p>";
+		} else if(page == "follower") {
+			html = "<p>フォロワーなし</p>"
+		}
+	}
+
+	return html;
+}
+
 async function is_follow(userid, followid) {
 	var query = "SELECT * FROM follow WHERE userid='" + userid + "' and followid='" + followid + "'";
 	var result = await client.query(query);
@@ -217,6 +243,38 @@ app.get('/view_profile', function (req, res, next) {
 	})().catch(next);
 });
 
+app.get('/follow_list', function(req, res, next) {
+	(async () => {
+		if(req.session.userid !== undefined) {
+			var userid = req.session.userid;
+	
+			var followlist_query = "SELECT followid FROM follow WHERE userid='" + userid + "'";
+			var result = await client.query(followlist_query);
+
+			var html = follow_result_html(result, "follow");
+			res.render("follow_list", {result: html});
+		} else {
+			res.render("index", {});
+		}
+	})().catch(next)
+})
+
+app.get('/follower_list', function(req, res, next) {
+	(async () => {
+		if(req.session.userid !== undefined) {
+			var userid = req.session.userid;
+	
+			var followlist_query = "SELECT userid FROM follow WHERE followid='" + userid + "'";
+			var result = await client.query(followlist_query);
+
+			var html = follow_result_html(result, "follower");
+			res.render("follower_list", {result: html});
+		} else {
+			res.render("index", {});
+		}
+	})().catch(next)
+})
+
 app.get('/follow', function(req, res, next) {
 	(async () => {
 		var userid = req.session.userid;
@@ -285,7 +343,7 @@ app.post("/do_search", (req, res, next) => {
 			var search_str = req.body.search;
 			var query = "SELECT * FROM profile WHERE id LIKE '%" + search_str + "%' AND id NOT LIKE '" + req.session.userid + "' AND hide IS NOT true";
 			var result = await client.query(query);
-			html = search_result_html(result)
+			html = search_result_html(result, "search");
 			res.render("search_result",{result: html});
 		}
 	})().catch(next);
