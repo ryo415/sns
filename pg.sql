@@ -35,6 +35,18 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
+-- Name: follow; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.follow (
+    userid text,
+    followid text
+);
+
+
+ALTER TABLE public.follow OWNER TO postgres;
+
+--
 -- Name: member; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -64,6 +76,14 @@ CREATE TABLE public.profile (
 ALTER TABLE public.profile OWNER TO postgres;
 
 --
+-- Data for Name: follow; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.follow (userid, followid) FROM stdin;
+\.
+
+
+--
 -- Data for Name: member; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -77,7 +97,7 @@ admin	$2b$10$UhSHJ9sFL7ONafpvyfmYee1TJD.VPUhg9SACso7PBj/lhloqfOIG.	1
 --
 
 COPY public.profile (id, icon_image, intro, bd_month, bd_day, hide) FROM stdin;
-admin	\N	よろしくお願いします。	5	12	f
+admin	\N	よろしくお願いします。	5	12	t
 \.
 
 

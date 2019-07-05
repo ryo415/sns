@@ -86,6 +86,44 @@ function search_result_html(result) {
 
 	return html;
 }
+
+function follow_result_html(result, page) {
+	var html;
+	if(result.rows.length != 0){
+		var id;
+		var intro;
+		html = "<table border=1><tr><th>ID</th>";
+		for(var i=0;i<result.rows.length;i++) {
+			if(page == "follow") {
+				id = result.rows[i].followid;
+			} else if(page == "follower") {
+				id = result.rows[i].userid;
+			}
+			html = html + "<tr><td><a href='/view_profile?userid=" + id + "'>"+ id + "</a></td></tr>";
+		}
+		html = html + "</table>"
+	} else {
+		if(page == "follow") {
+			html = "<p>フォローなし</p>";
+		} else if(page == "follower") {
+			html = "<p>フォロワーなし</p>"
+		}
+	}
+
+	return html;
+}
+
+async function is_follow(userid, followid) {
+	var query = "SELECT * FROM follow WHERE userid='" + userid + "' and followid='" + followid + "'";
+	var result = await client.query(query);
+	var follow_flag = false;
+	if(typeof result.rows[0] !== 'undefined'){
+		follow_flag = true;
+	}
+
+	return follow_flag
+}
+
 client.connect();
 
 var server = app.listen(3000, function(){
@@ -158,6 +196,8 @@ app.get("/do_restore", function(req, res, next) {
 					await client.query(query);
 					query = "DELETE FROM profile WHERE id='" + req.session.userid + "'";
 					await client.query(query);
+					query = "DELETE FROM follow WHERE id='" + req.session.userid + "'";
+					await client.query(query);
 					delete req.session.userid;
 					res.render("restore_complete",{});
 				} else {
@@ -180,14 +220,83 @@ app.get("/search", function(req, res, next) {
 
 app.get('/view_profile', function (req, res, next) {
 	(async () => {
-		var userid = req.query.userid
-		var profile = await get_profile(userid);
-		if(profile.hide == 'ON') {
-			res.render("hide_profile", {});
+		if(req.session.userid != undefined) {
+			var userid = req.query.userid
+			var profile = await get_profile(userid);
+			var follow = await is_follow(req.session.userid, req.query.userid);
+			var follow_button;
+
+			if(follow) {
+				follow_button = "フォロー中<br><a href='/unfollow?followid=" + userid + "'>フォロー解除する</a>";
+			} else {
+				follow_button = "<a href='/follow?followid=" + userid + "'>フォローする</a>";
+			}
+	
+			if(profile.hide == 'ON') {
+				res.render("hide_profile", {});
+			} else {
+				res.render("view_profile", {userid: profile.userid, intro: profile.intro, month: profile.month, day: profile.day, follow_button: follow_button});
+			}
 		} else {
-			res.render("view_profile", {userid: profile.userid, intro: profile.intro, month: profile.month, day: profile.day});
+			res.render("index", {});
 		}
 	})().catch(next);
+});
+
+app.get('/follow_list', function(req, res, next) {
+	(async () => {
+		if(req.session.userid !== undefined) {
+			var userid = req.session.userid;
+	
+			var followlist_query = "SELECT followid FROM follow WHERE userid='" + userid + "'";
+			var result = await client.query(followlist_query);
+
+			var html = follow_result_html(result, "follow");
+			res.render("follow_list", {result: html});
+		} else {
+			res.render("index", {});
+		}
+	})().catch(next)
+})
+
+app.get('/follower_list', function(req, res, next) {
+	(async () => {
+		if(req.session.userid !== undefined) {
+			var userid = req.session.userid;
+	
+			var followlist_query = "SELECT userid FROM follow WHERE followid='" + userid + "'";
+			var result = await client.query(followlist_query);
+
+			var html = follow_result_html(result, "follower");
+			res.render("follower_list", {result: html});
+		} else {
+			res.render("index", {});
+		}
+	})().catch(next)
+})
+
+app.get('/follow', function(req, res, next) {
+	(async () => {
+		var userid = req.session.userid;
+		var followid = req.query.followid
+
+		var follow_query = "INSERT INTO follow VALUES ('" + userid + "', '" + followid + "')";
+		await client.query(follow_query);
+
+		res.render("complete_follow", {title: "フォロー完了"});
+	})().catch(next)
+});
+
+app.get('/unfollow', function(req, res, next) {
+	(async () => {
+		var userid = req.session.userid;
+		var unfollowid = req.query.followid;
+
+		var unfollow_query = "DELETE FROM follow WHERE userid='" + userid + "' AND followid='" + unfollowid + "'";
+		await client.query(unfollow_query);
+
+		res.render("complete_follow", {title: "フォロー解除完了"})
+	})().catch(next)
 });
 
 app.post("/do_edit_profile", (req, res, next) => {
@@ -234,7 +343,7 @@ app.post("/do_search", (req, res, next) => {
 			var search_str = req.body.search;
 			var query = "SELECT * FROM profile WHERE id LIKE '%" + search_str + "%' AND id NOT LIKE '" + req.session.userid + "' AND hide IS NOT true";
 			var result = await client.query(query);
-			html = search_result_html(result)
+			html = search_result_html(result, "search");
 			res.render("search_result",{result: html});
 		}
 	})().catch(next);
@@ -295,8 +404,10 @@ app.post("/add",(req, res, next) => {
 		} else {
 			var add_query = "INSERT INTO member VALUES ('" + input_userid + "', '" + input_passwd_hash + "', 00001 )";
 			var add_profile_query = "INSERT INTO profile VALUES ('" + input_userid + "',null,null,null,null,false)";
+			var add_follow_query = "INSERT INTO follow VALUES ('" + input_userid + "',null,null)";
 			client.query(add_query);
 			client.query(add_profile_query);
+			client.query(add_follow_query);
 			res.render("add_user_complete",{});
 		}
 	})().catch(next);
