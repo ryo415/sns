@@ -232,7 +232,7 @@ app.get('/view_profile', function (req, res, next) {
 				follow_button = "<a href='/follow?followid=" + userid + "'>フォローする</a>";
 			}
 	
-			if(profile.hide == 'ON') {
+			if(profile.hide == 'ON' && !is_follow(req.session.userid, userid)) {
 				res.render("hide_profile", {});
 			} else {
 				res.render("view_profile", {userid: profile.userid, intro: profile.intro, month: profile.month, day: profile.day, follow_button: follow_button});
